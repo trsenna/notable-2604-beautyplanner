@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: planner-postgres
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 18.6.1
+    chart: postgresql
+    helm:
+      parameters:
+        - name: primary.image.registry
+          value: "public.ecr.aws"
+        - name: primary.image.repository
+          value: "bitnami/postgresql"
+        - name: primary.image.tag
+          value: "16.4.0-debian-12-r14"
+        - name: auth.postgresPassword
+          value: "beautyplanner"
+        - name: auth.database
+          value: "plannerdb"
+        - name: primary.persistence.enabled
+          value: "false"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: database
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
