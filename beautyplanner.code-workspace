@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "Beauty Planner (Root)",
+			"path": "."
+		},
+		{
+			"name": "Service: Planner Command",
+			"path": "services/planner-command"
+		},
+		{
+			"name": "Service: Planner Query",
+			"path": "services/planner-query"
+		},
+		{
+			"name": "Service: Planner Sync",
+			"path": "services/planner-sync"
+		}
+	],
+	"settings": {
+		"java.project.importHint": "maven",
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}
