@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/trsenna/notable-2604-beautyplanner.git'
-    targetRevision: main
+    targetRevision: develop
     path: platform/k8s/planner-sync
   destination:
     server: 'https://kubernetes.default.svc'
