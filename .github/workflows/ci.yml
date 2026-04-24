@@ -85,3 +85,38 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  update-manifests:
+    name: Update K8s Manifests
+    needs: [detect-changes, build-and-push]
+    if: ${{ github.event_name != 'pull_request' && needs.detect-changes.outputs.services != '[]' && needs.detect-changes.outputs.services != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Update Kubernetes manifests
+        working-directory: platform/k8s/${{ matrix.service }}
+        run: |
+          IMAGE_TAG="sha-${GITHUB_SHA}"
+          kustomize edit set image ghcr.io/${{ github.repository }}/${{ matrix.service }}=ghcr.io/${{ github.repository }}/${{ matrix.service }}:${IMAGE_TAG}
+          
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add platform/k8s/${{ matrix.service }}/kustomization.yaml
+          git diff --staged --quiet || git commit -m "chore: update ${{ matrix.service }} image to sha-${GITHUB_SHA} [skip ci]"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }}
