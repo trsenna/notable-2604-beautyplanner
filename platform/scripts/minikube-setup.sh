@@ -6,6 +6,26 @@ set -e
 echo "🚀 Iniciando Minikube com 3 nós (Profile: beautyplanner)..."
 minikube start --nodes 3 --profile beautyplanner
 
+echo "⚙️ Habilitando addons..."
+minikube addons enable ingress --profile beautyplanner
+
+echo "⚙️ Instalando cert-manager via manifesto oficial..."
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+
+echo "⏳ Aguardando os Pods do Ingress e cert-manager estarem prontos..."
+kubectl wait --for=condition=Ready pods --all -n ingress-nginx --timeout=300s
+kubectl wait --for=condition=Ready pods --all -n cert-manager --timeout=300s
+
+echo "📂 Aplicando configurações de PKI (cert-manager)..."
+kubectl apply -f platform/k8s/cert-manager/
+
+echo "⚙️ Configurando certificado TLS padrão no Ingress..."
+# Aguarda os secrets serem gerados pelo cert-manager
+kubectl wait --for=condition=Ready certificate/localhost-wildcard-cert -n cert-manager --timeout=60s
+
+# Patch no deployment do ingress-nginx para usar o certificado padrão (fallback)
+kubectl patch deployment ingress-nginx-controller -n ingress-nginx --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--default-ssl-certificate=cert-manager/localhost-tls-secret"}]'
+
 echo "📂 Criando namespace 'argocd'..."
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 
@@ -26,10 +46,15 @@ echo -n "Senha: "
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 echo ""
 echo "---------------------------------------------------"
-echo "🌐 Como acessar a interface web:"
-echo "1. Execute o comando abaixo em um NOVO terminal:"
-echo "   kubectl port-forward svc/argocd-server -n argocd 8080:443"
+echo "🌐 Como acessar as aplicações:"
+echo "1. Execute o port-forward do Ingress em um NOVO terminal:"
+echo "   kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8443:443"
 echo ""
-echo "2. Abra no navegador: https://localhost:8080"
-echo "   (Nota: Aceite o aviso de certificado auto-assinado)"
+echo "2. Extraia e instale a CA no seu navegador rodando:"
+echo "   ./platform/scripts/extract-ca.sh"
+echo ""
+echo "3. Abra no navegador:"
+echo "   - ArgoCD: https://argocd.localhost:8443"
+echo "   - Planner Command: https://planner.localhost:8443/command"
+echo "   - Planner Query: https://planner.localhost:8443/query"
 echo "---------------------------------------------------"

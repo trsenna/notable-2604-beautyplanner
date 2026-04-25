@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: planner-sync-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+  - hosts:
+    - planner.localhost
+    secretName: localhost-tls-secret
+  rules:
+  - host: planner.localhost
+    http:
+      paths:
+      - path: /sync(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: planner-sync
+            port:
+              number: 8080
