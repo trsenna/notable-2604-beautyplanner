@@ -7,5 +7,6 @@ resources:
   - ingress.yaml
 
 images:
-  - name: ghcr.io/trsenna/notable-2604-beautyplanner/planner-command
-    newTag: sha-0d41a505debc783a2ebf91d95c875615835c76a0
+- name: ghcr.io/trsenna/notable-2604-beautyplanner/planner-command
+  newName: ghcr.io/trsenna/notable-2604-beautyplanner/planner-command
+  newTag: sha-5bba0c516421b32f10f7fe610df275798175d069
