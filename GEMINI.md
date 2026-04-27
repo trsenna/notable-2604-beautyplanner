@@ -38,3 +38,14 @@ The system is a Cloud Native microservices architecture using the Command Query 
   2. **Multi-stage Build:** Clearly separate the build stage (JDK) from the runtime stage (lean JRE Alpine) to prevent source code and build tools leakage.
   3. **Layer Caching:** Maven files (`.mvn`, `mvnw`, `pom.xml`) MUST be copied and dependencies downloaded offline *before* copying the source code (`src/`).
   4. **Security (Non-root):** Containers MUST NEVER run as `root`. The final production image must use generic numeric IDs (UID `1001`, GID `1001`) to comply with restrictive Kubernetes SecurityContext policies.
+
+## 6. Observability (LGTM Stack)
+The project uses the LGTM stack (Loki, Grafana, Tempo, Mimir/Prometheus) for comprehensive observability, managed via ArgoCD in the `monitoring` namespace.
+- **Tools:**
+  - **Prometheus & Grafana:** Managed via `kube-prometheus-stack`. Grafana is the central visualization tool.
+  - **Loki:** Log aggregation system.
+  - **Tempo:** Distributed tracing backend.
+- **Endpoints:**
+  - Grafana: `https://grafana.localhost`
+  - Prometheus: `https://prometheus.localhost`
+- **Current State:** The stack is provisioned at the infrastructure level. Application-level integration (Micrometer, OpenTelemetry, etc.) is a pending task for the Java services.
