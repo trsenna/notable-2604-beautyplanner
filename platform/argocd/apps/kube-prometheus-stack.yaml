@@ -12,6 +12,17 @@ spec:
     helm:
       values: |
         grafana:
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki-stack.monitoring.svc.cluster.local:3100
+              access: proxy
+              isDefault: false
+            - name: Tempo
+              type: tempo
+              url: http://tempo.monitoring.svc:3100
+              access: proxy
+              isDefault: false
           ingress:
             enabled: true
             ingressClassName: nginx
