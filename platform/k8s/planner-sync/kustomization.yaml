@@ -2,11 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
+- deployment.yaml
+- service.yaml
+- ingress.yaml
 
 images:
 - name: ghcr.io/trsenna/notable-2604-beautyplanner/planner-sync
   newName: ghcr.io/trsenna/notable-2604-beautyplanner/planner-sync
-  newTag: sha-5bba0c516421b32f10f7fe610df275798175d069
+  newTag: sha-0d50fe4975f60f412fcbd3e526915f355511b3ec
