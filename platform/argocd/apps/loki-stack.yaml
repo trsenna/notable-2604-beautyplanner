@@ -16,6 +16,12 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
+          podSecurityContext:
+            fsGroup: 10001
+          containerSecurityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
         promtail:
           enabled: true
         grafana:
