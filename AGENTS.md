@@ -49,3 +49,8 @@ The project uses the LGTM stack (Loki, Grafana, Tempo, Mimir/Prometheus) for com
   - Grafana: `https://grafana.localhost`
   - Prometheus: `https://prometheus.localhost`
 - **Current State:** The stack is provisioned at the infrastructure level. Application-level integration (Micrometer, OpenTelemetry, etc.) is a pending task for the Java services.
+
+## 7. Cursor Cloud specific instructions
+- All 3 services default to port 8080. Run one at a time or override `server.port`.
+- The tracing endpoint (`tempo.monitoring.svc.cluster.local`) is unreachable outside the cluster — the warning at startup is expected and non-blocking.
+- Do not create branches or PRs during environment setup tasks unless explicitly asked.
