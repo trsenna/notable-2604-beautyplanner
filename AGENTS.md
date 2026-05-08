@@ -51,6 +51,6 @@ The project uses the LGTM stack (Loki, Grafana, Tempo, Mimir/Prometheus) for com
 - **Current State:** The stack is provisioned at the infrastructure level. Application-level integration (Micrometer, OpenTelemetry, etc.) is a pending task for the Java services.
 
 ## 7. Cursor Cloud specific instructions
-- All 3 services default to port 8080. Run one at a time or override `server.port`.
-- The tracing endpoint (`tempo.monitoring.svc.cluster.local`) is unreachable outside the cluster — the warning at startup is expected and non-blocking.
-- Do not create branches or PRs during environment setup tasks unless explicitly asked.
+- Os 3 serviços usam a porta 8080 por padrão. Execute um por vez ou sobrescreva `server.port`.
+- O endpoint de tracing (`tempo.monitoring.svc.cluster.local`) não é acessível fora do cluster — o warning no startup é esperado e não impede a execução.
+- Só abra uma PR quando a tarefa estiver concluída e confirmada, ou quando for explicitamente solicitado.
