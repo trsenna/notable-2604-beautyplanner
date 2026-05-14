@@ -1,0 +1,60 @@
+name: k3d bootstrap smoke
+
+on:
+  pull_request:
+    paths:
+      - 'platform/scripts/k3d-setup.sh'
+      - 'platform/scripts/k3d-cleanup.sh'
+      - 'platform/k8s/cert-manager/**'
+      - '.github/workflows/k3d-bootstrap-smoke.yml'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'platform/scripts/k3d-setup.sh'
+      - 'platform/scripts/k3d-cleanup.sh'
+      - 'platform/k8s/cert-manager/**'
+      - '.github/workflows/k3d-bootstrap-smoke.yml'
+
+jobs:
+  k3d-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      K3D_CLUSTER_NAME: beautyplanner-ci-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k3d
+        run: |
+          set -euo pipefail
+          curl -sSLo /tmp/k3d https://github.com/k3d-io/k3d/releases/download/v5.8.2/k3d-linux-amd64
+          chmod +x /tmp/k3d
+          sudo mv /tmp/k3d /usr/local/bin/k3d
+          k3d version
+
+      - name: Run k3d bootstrap script
+        run: |
+          set -euo pipefail
+          chmod +x platform/scripts/k3d-setup.sh platform/scripts/k3d-cleanup.sh
+          ./platform/scripts/k3d-setup.sh
+
+      - name: Verify nodes and control-plane workloads
+        run: |
+          set -euo pipefail
+          kubectl get nodes -o wide
+          kubectl get pods -n ingress-nginx -o wide
+          kubectl get pods -n cert-manager -o wide
+          kubectl get pods -n argocd -o wide
+          ready_nginx="$(kubectl get pods -n ingress-nginx -l app.kubernetes.io/component=controller --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d ' ')"
+          ready_cm="$(kubectl get pods -n cert-manager --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d ' ')"
+          ready_cd="$(kubectl get pods -n argocd --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d ' ')"
+          test "${ready_nginx}" -ge 1
+          test "${ready_cm}" -ge 1
+          test "${ready_cd}" -ge 1
+
+      - name: Delete k3d cluster
+        if: always()
+        run: |
+          set -euo pipefail
+          chmod +x platform/scripts/k3d-cleanup.sh
+          ./platform/scripts/k3d-cleanup.sh
